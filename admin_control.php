@@ -2,8 +2,8 @@
 ob_start();
 date_default_timezone_set('Asia/Kolkata');
 
-require_once'../connection.php';
-require_once'../includes/functions.php';
+require_once'connection.php';
+require_once'includes/functions.php';
 //session_start();
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
@@ -12,10 +12,51 @@ case 'approve_meeting' :approve_meeting($pdo); break;
 case 'invitebids' :invitebids($pdo); break;
 case 'adminlogin' :adminlogin($pdo); break;
 case 'approvepayment' :approvepayment($pdo); break;
+case 'createadmin' :createadmin($pdo); break;
 
 default : header('Location: /index.php'); 
 
 }
+
+function createadmin($pdo)
+{
+    $user_name = $_REQUEST['name'];
+    $user_email = $_REQUEST['email'];
+    $password = $_REQUEST['password'];
+    $con_password = $_REQUEST['con_password'];
+    $role = $_REQUEST['role'];
+
+    if($user_name == '' || $user_email == '' || $password == '' || $con_password == '' || $role == '')
+    {
+        echo "all filled compulsory";
+    }
+    else if (!preg_match("/^[a-zA-Z-' ]*$/",$user_name))
+    {
+        echo "name only letter";
+    }
+    else if (!filter_var($user_email, FILTER_VALIDATE_EMAIL)) 
+    {
+        echo "Invalid email format";
+    }
+    else if($password != $con_password)
+    {
+        echo "your password and confirm password not match";
+    }
+    else
+    {
+        $password = password_hash($password, PASSWORD_DEFAULT);
+        $data = array(
+                'user_name'=>$_REQUEST['name'],
+                'user_email'=>$_REQUEST['email'],
+                'password'=>$password,
+                'role'=>$_REQUEST['role'],
+            );
+        $stmt = $pdo->prepare("INSERT INTO tbl_administrator (user_name, user_email, password, role) VALUES (:user_name, :user_email, :password, :role)");
+        $stmt->execute($data);
+    }
+    echo "ok";
+}
+
 
 function approvepayment($pdo){    
     $data = array(

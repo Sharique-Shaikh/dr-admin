@@ -58,7 +58,7 @@ include('../connection.php');
                              
                               <td><?php echo $admin['status'] == 1 ? '<span class="txt-approved" ><i class="far fa-dot-circle   me-2"></i>Approved</span>' : '<span class="txt-pending"><i class="far fa-dot-circle  me-2"></i>Pending</span>'; ?></td>
 
-                               <td><div class="action-btn"> <a href="" class="bg-declined text-white" data-bs-toggle="modal" data-bs-target="#adminAlert"><i class="fas fa-archive me-1"></i> Archive</a> <a href="" class="bg-pending text-white" data-bs-toggle="modal" data-bs-target="#createAdmin"><i class="far fa-eye me-1"></i> View More</a></td>
+                               <td><div class="action-btn"> <a href="" class=" text-white" data-bs-toggle="modal" data-bs-target="#adminAlert" title="Archive"><i class="fas fa-archive text-dark"></i></a> <a href="" class=" text-white" data-bs-toggle="modal" data-bs-target="#createAdmin" title="View More"><i class="far fa-eye  text-dark"></i> </a></td>
 
 
 

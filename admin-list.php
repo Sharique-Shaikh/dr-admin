@@ -58,7 +58,7 @@ include('../connection.php');
                              
                               <td><?php echo $admin['status'] == 1 ? '<span class="txt-approved" ><i class="far fa-dot-circle   me-2"></i>Approved</span>' : '<span class="txt-pending"><i class="far fa-dot-circle  me-2"></i>Pending</span>'; ?></td>
 
-                               <td><div class="action-btn"> <a href="" class="bg-declined text-white">Archive</a> <a href="" class="bg-pending text-white" data-bs-toggle="modal" data-bs-target="#createAdmin">View More</a></td>
+                               <td><div class="action-btn"> <a href="" class="bg-declined text-white" data-bs-toggle="modal" data-bs-target="#adminAlert"><i class="fas fa-archive me-1"></i> Archive</a> <a href="" class="bg-pending text-white" data-bs-toggle="modal" data-bs-target="#createAdmin"><i class="far fa-eye me-1"></i> View More</a></td>
 
 
 
@@ -129,6 +129,23 @@ include('../connection.php');
                      <button type="submit" class="btn background-one px-4 rounded-3 text-white text-nowrap">Approve & Send Reminder</button>
                   </div>
                </form>
+            </div>
+         </div>
+      </div>
+
+
+
+      <div class="modal fade" id="adminAlert" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="newmeetingPopupLabel" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+               <div class="modal-header border-0 pb-0">
+                  <!-- <h5 class="modal-title" id="newmeetingPopupLabel">Create Admin</h5> -->
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="p-4 text-center ">
+                  <h3>Are you sure you want to archive this records?</h3>
+                  <div class="mt-4 "><button class="btn  background-one w-25 rounded-3 text-white text-nowrap mx-2">Yes </button><button class="btn bg-danger rounded-3 text-white text-nowrap mx-2 w-25" data-bs-dismiss="modal"> Cancel</button></div>
+               </div>
             </div>
          </div>
       </div>

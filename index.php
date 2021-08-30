@@ -53,9 +53,9 @@ include('../connection.php');
 						<div class="mb-3">
 						  <label  class="form-label">Password</label>
 
-						  <div class="input-group">
-						  <input type="password" class="form-control" placeholder="Email password" name="password">
-						  <span class="input-group-text"><i class="fas fa-unlock"></i></span>
+						  <div class="input-group position-relative">
+						  <input type="password" class="form-control" placeholder="Email password" name="password" id="inputPass">
+						  <span id="showPass" class=" position-absolute  bg-white p-1 " style="right:50px; top:3px;"><i class="far fa-eye  text-dark"></i></span><span class="input-group-text"><i class="fas fa-unlock"></i></span>
 						</div>
 
 
@@ -88,5 +88,14 @@ include('../connection.php');
 	<script src="https://cdn.datatables.net/fixedcolumns/3.3.3/js/dataTables.fixedColumns.min.js"></script>
 	<script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script> -->
     <script src="assets/js/validation.js"></script>
+	<script>
+		$('#showPass').click(function(){
+			if($('#inputPass').attr('type')==='password'){
+				$('#inputPass').attr('type','text');
+			}else{
+				$('#inputPass').attr('type','password');
+			}
+		});
+	</script>
 </body>
 </html>

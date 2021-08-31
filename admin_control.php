@@ -13,48 +13,11 @@ case 'invitebids' :invitebids($pdo); break;
 case 'adminlogin' :adminlogin($pdo); break;
 case 'approvepayment' :approvepayment($pdo); break;
 case 'createadmin' :createadmin($pdo); break;
+case 'fetchAdmin' :fetchAdmin($pdo); break;
+case 'updateadmin' :updateadmin($pdo); break;
 
-default : header('Location: /index.php'); 
+default : header('Location: /index.php');
 
-}
-
-function createadmin($pdo)
-{
-    $user_name = $_REQUEST['name'];
-    $user_email = $_REQUEST['email'];
-    $password = $_REQUEST['password'];
-    $con_password = $_REQUEST['con_password'];
-    $role = $_REQUEST['role'];
-
-    if($user_name == '' || $user_email == '' || $password == '' || $con_password == '' || $role == '')
-    {
-        echo "all filled compulsory";
-    }
-    else if (!preg_match("/^[a-zA-Z-' ]*$/",$user_name))
-    {
-        echo "name only letter";
-    }
-    else if (!filter_var($user_email, FILTER_VALIDATE_EMAIL)) 
-    {
-        echo "Invalid email format";
-    }
-    else if($password != $con_password)
-    {
-        echo "your password and confirm password not match";
-    }
-    else
-    {
-        $password = password_hash($password, PASSWORD_DEFAULT);
-        $data = array(
-                'user_name'=>$_REQUEST['name'],
-                'user_email'=>$_REQUEST['email'],
-                'password'=>$password,
-                'role'=>$_REQUEST['role'],
-            );
-        $stmt = $pdo->prepare("INSERT INTO tbl_administrator (user_name, user_email, password, role) VALUES (:user_name, :user_email, :password, :role)");
-        $stmt->execute($data);
-    }
-    echo "ok";
 }
 
 
@@ -132,4 +95,144 @@ function approve_meeting($pdo){
     $stmt = $pdo->prepare("update tbl_society_meetings set zoom_link = :zoom_link, status = :status where recid = :meetingid");
     $stmt->execute($data);
 
+}
+
+
+function createadmin($pdo)
+{
+    $user_name = $_POST['name'];
+    $user_email = $_POST['email'];
+    $password = $_POST['password'];
+    $con_password = $_POST['con_password'];
+    $role = $_POST['role'];
+
+
+    if(empty($user_name) || empty($user_email) || empty($password) || empty($con_password) || empty($role))
+    {
+        echo "All Filled Compulsory.";
+        exit();
+    }
+    else if (!preg_match("/^[a-zA-Z-' ]*$/",$user_name))
+    {
+        echo "Only Letter Format.";
+        exit();
+    }
+    else if (!filter_var($user_email, FILTER_VALIDATE_EMAIL)) 
+    {
+        echo "Invalid Email ID Format.";
+        exit();
+    }
+    else if($password != $con_password)
+    {
+        echo "Your Password and Confirm Password Not Match.";
+        exit();
+    }
+    
+    $sql = "SELECT user_email FROM tbl_administrator WHERE user_email=:username and status=1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam('username', $user_email);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result) 
+    {
+        echo "Already Email ID Exist";
+        exit();
+    } 
+    else 
+    {
+        $password = password_hash($password, PASSWORD_DEFAULT);
+        $data = array(
+                'user_name'=>$user_name,
+                'user_email'=>$user_email,
+                'password'=>$password,
+                'role'=>$role,
+            );
+
+        $stmt2 = $pdo->prepare("INSERT INTO tbl_administrator (user_name, user_email, password, role) VALUES (:user_name, :user_email, :password, :role)");
+        $stmt2->execute($data);
+        
+        echo "Created Successfully";
+    }
+}
+
+function fetchAdmin($pdo)
+{
+    $sql = "SELECT recid,user_name,user_email,password,role FROM tbl_administrator WHERE recid=:recid and status=1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam('recid', $_REQUEST['recid']);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo json_encode($result);
+}
+
+function updateadmin($pdo)
+{
+
+    $user_name = $_POST['update_name'];
+    $user_email = $_POST['update_email'];
+    $password = $_POST['update_password'];
+    $con_password = $_POST['update_con_password'];
+    $role = $_POST['update_role'];
+    $recid = $_POST['recid'];
+
+    if(empty($user_name) || empty($user_email) || empty($role))
+    {
+        echo "All Filled Compulsory.";
+        exit();
+    }
+    else if (!preg_match("/^[a-zA-Z-' ]*$/",$user_name))
+    {
+        echo "Only Letter Format.";
+        exit();
+    }
+    else if (!filter_var($user_email, FILTER_VALIDATE_EMAIL)) 
+    {
+        echo "Invalid Email ID Format.";
+        exit();
+    }
+    else if($password != $con_password)
+    {
+        echo "Your Password and Confirm Password Not Match.";
+        exit();
+    }
+    $sql = "SELECT user_email FROM tbl_administrator WHERE user_email=:username and status=1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam('username', $user_email);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result) 
+    {
+        echo "Already Email ID Exist";
+        exit();
+    } 
+    else 
+    {
+        if(empty($password))
+        {
+            $data = array(
+                'recid'=>$recid,
+                'user_name'=>$user_name,
+                'user_email'=>$user_email,
+                'role'=>$role
+            );
+
+            $stmt = $pdo->prepare("UPDATE tbl_administrator set user_name = :user_name, user_email = :user_email, role = :role where recid = :recid");
+            $stmt->execute($data);
+        }
+        else
+        {
+            $password = password_hash($password, PASSWORD_DEFAULT);
+            $data = array(
+                    'recid'=>$recid,
+                    'user_name'=>$user_name,
+                    'user_email'=>$user_email,
+                    'password'=>$password,
+                    'role'=>$role
+                );
+
+            $stmt = $pdo->prepare("UPDATE tbl_administrator set user_name = :user_name, user_email = :user_email, password = :password, role = :role where recid = :recid");
+            $stmt->execute($data);
+        }
+        echo "Updated Successfully.";
+    }
 }

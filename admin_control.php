@@ -15,6 +15,7 @@ case 'approvepayment' :approvepayment($pdo); break;
 case 'createadmin' :createadmin($pdo); break;
 case 'fetchAdmin' :fetchAdmin($pdo); break;
 case 'updateadmin' :updateadmin($pdo); break;
+case 'archiveAdmin' :archiveAdmin($pdo); break;
 
 default : header('Location: /index.php');
 
@@ -151,7 +152,8 @@ function createadmin($pdo)
         $stmt2 = $pdo->prepare("INSERT INTO tbl_administrator (user_name, user_email, password, role) VALUES (:user_name, :user_email, :password, :role)");
         $stmt2->execute($data);
         
-        echo "Created Successfully";
+        
+        echo 1;
     }
 }
 
@@ -195,15 +197,53 @@ function updateadmin($pdo)
         echo "Your Password and Confirm Password Not Match.";
         exit();
     }
-    $sql = "SELECT user_email FROM tbl_administrator WHERE user_email=:username and status=1";
+    $sql = "SELECT recid,user_email FROM tbl_administrator WHERE user_email=:username and status=1";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam('username', $user_email);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($result) 
     {
-        echo "Already Email ID Exist";
-        exit();
+
+        /*echo "<pre>";
+        print_r($result);*/
+
+        if($result['recid'] != $recid)
+        {
+            echo "Already Email ID Exist";
+            exit();
+            
+        }
+        else
+        {
+            if(empty($password))
+            {
+                $data = array(
+                    'recid'=>$recid,
+                    'user_name'=>$user_name,
+                    'user_email'=>$user_email,
+                    'role'=>$role
+                );
+
+                $stmt = $pdo->prepare("UPDATE tbl_administrator set user_name = :user_name, user_email = :user_email, role = :role where recid = :recid");
+                $stmt->execute($data);
+            }
+            else
+            {
+                $password = password_hash($password, PASSWORD_DEFAULT);
+                $data = array(
+                        'recid'=>$recid,
+                        'user_name'=>$user_name,
+                        'user_email'=>$user_email,
+                        'password'=>$password,
+                        'role'=>$role
+                    );
+
+                $stmt = $pdo->prepare("UPDATE tbl_administrator set user_name = :user_name, user_email = :user_email, password = :password, role = :role where recid = :recid");
+                $stmt->execute($data);
+            }
+            echo 1;
+        }
     } 
     else 
     {
@@ -233,6 +273,19 @@ function updateadmin($pdo)
             $stmt = $pdo->prepare("UPDATE tbl_administrator set user_name = :user_name, user_email = :user_email, password = :password, role = :role where recid = :recid");
             $stmt->execute($data);
         }
-        echo "Updated Successfully.";
+        echo 1;
     }
+}
+
+
+function archiveAdmin($pdo)
+{
+    $recid = $_POST['recid'];
+
+
+    $stmt = $pdo->prepare("UPDATE tbl_administrator set status = 0 where recid = :recid");
+    $stmt->bindParam(':recid', $recid);
+
+    $stmt->execute();
+    echo 1;
 }

@@ -33,7 +33,7 @@ include('connection.php');
                   <div class="table-main  rounded background-white p-4">
                      <div class="table-heading d-flex justify-content-between align-items-center mb-4">
                         <h1 class=" mb-4">Admin List</h1>
-                        <button class="btn background-one rounded-pill text-white text-nowrap" id="create_admin_btn" data-bs-toggle="modal" data-bs-target="#createadminpopup"> Create Admin</button>
+                        <button class="btn background-one rounded-pill text-white text-nowrap" data-bs-toggle="modal" data-bs-target="#createadminpopup"> Create Admin</button>
                      </div>
                      <table id="dr-adminlist" class=" row-border   border-0 text-nowrap " style="width:100%!important;">
                         <thead class="bg-light border-0">
@@ -47,7 +47,7 @@ include('connection.php');
                         </thead>
                         <tbody>
                            <?php                         
-                              $stmt = $pdo->prepare("SELECT * FROM `tbl_administrator` WHERE status=1");
+                              $stmt = $pdo->prepare("SELECT * FROM `tbl_administrator` WHERE status=1 ORDER BY `recid` DESC");
                               $stmt->execute();
                               $alladmin = $stmt->fetchAll();
                               foreach($alladmin as $admin){ ?>
@@ -58,16 +58,18 @@ include('connection.php');
                              
                               <td><?php echo $admin['status'] == 1 ? '<span class="txt-approved" ><i class="far fa-dot-circle   me-2"></i>Approved</span>' : '<span class="txt-pending"><i class="far fa-dot-circle  me-2"></i>Pending</span>'; ?></td>
 
-                               <td><div class="action-btn"> <a href="" class="bg-declined text-white">Archive</a> 
+                              <td>
+                                <div class="action-btn"> 
+                                    <a href="" recid="<?php echo $admin['recid'];?>" class=" text-white" data-bs-toggle="modal" data-bs-target="#archiveAlert" title="Archive"><i class="fas fa-archive text-dark"></i></a> 
 
-
-                               <a href="" recid="<?php echo $admin['recid'];?>" class="bg-pending text-white update" data-bs-toggle="modal" data-bs-target="#updateadminpopup">View More</a></td>
+                                    <a href="" recid="<?php echo $admin['recid'];?>" class="update text-white" data-bs-toggle="modal" data-bs-target="#updateadminpopup" title="View More"><i class="far fa-eye  text-dark"></i> </a>
+                                </div>
+                              </td>
 
 
 
                               <!--   <td></?php //echo $developer['is_verified'] == 1 ? '<span class="txt-approved" ><i class="far fa-dot-circle   me-2"></i>Approved</span>' : '<span class="txt-pending"><i class="far fa-dot-circle  me-2"></i>Pending</span>'; ?></td> -->
-                              <!--                 <td><button class="btn background-one rounded-pill text-white text-nowrap">View More</button></td>
-                                 -->               
+                              <!--                 <td><button class="btn background-one rounded-pill text-white text-nowrap">View More</button></td> -->               
                            </tr>
                            <?php }?>
                         </tbody>
@@ -127,15 +129,15 @@ include('connection.php');
                   </div>
                   <div class="modal-footer justify-content-center border-top-0">
                      <button type="submit" class="btn background-one px-4 rounded-3 text-white text-nowrap" id="submit">Approve & Send Reminder</button>
-                     <div id="error_sms_created"></div>
                   </div>
+                     <div id="error_sms_created"></div>
                </form>
             </div>
          </div>
       </div>
 
 
-         <!-- Modal Update-->
+      <!-- Modal Update-->
       <div class="modal fade" id="updateadminpopup" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="updateadminLabel" aria-hidden="true">
          <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -186,12 +188,35 @@ include('connection.php');
                   <div class="modal-footer justify-content-center border-top-0">
                      <input type="hidden" id="recid" name="recid">
                      <button type="submit" class="btn background-one px-4 rounded-3 text-white text-nowrap" id="update_btn">Update</button>
-                     <div id="error_sms_update"></div>
                   </div>
+                     <div id="error_sms_update"></div>
                </form>
             </div>
          </div>
       </div>
+
+
+      <div class="modal fade" id="archiveAlert" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="newmeetingPopupLabel" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+               <div class="modal-header border-0 pb-0">
+                  <!-- <h5 class="modal-title" id="newmeetingPopupLabel">Create Admin</h5> -->
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+               </div>
+               <div class="p-4 text-center ">
+                  <h3>Are you sure you want to archive this records?</h3>
+                  <div class="mt-4 ">
+
+                    <button class="btn background-one w-25 rounded-3 text-white text-nowrap mx-2" id="archiveBtn">Yes </button>
+
+                    <button class="btn bg-danger rounded-3 text-white text-nowrap mx-2 w-25" data-bs-dismiss="modal"> Cancel</button>
+                  </div>
+                  <div id="error_sms_archive"></div>
+               </div>
+            </div>
+         </div>
+      </div>
+
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -218,11 +243,13 @@ include('connection.php');
                 });
             });
 
+
+
             $(document).ready(function (){
 	var table = $('#dr-adminlist').DataTable({
 		
 		"paging":   true,
-        "info":   false,
+        "info":     false,
 		"filter": true,
       "pageLength": 25,
 	   'columnDefs': [{
@@ -249,6 +276,41 @@ include('connection.php');
 	});
 
 
+
+$('#archiveAlert').on('show.bs.modal', function(e) 
+{
+    var recid = $(e.relatedTarget).attr('recid');
+    $(e.currentTarget).find('button[id="archiveBtn"]').val(recid);
+    console.log(recid);
+});
+
+
+ 
+$("#archiveBtn").on("click",function()
+{
+  var recid = $(this).attr('value');
+  $.ajax({
+      type: "POST",
+      url: "admin_control.php",
+      data: {
+              recid : recid,
+              action : 'archiveAdmin'
+            }, 
+          success: function (data) 
+                {
+                  if(data == 1)
+                  {
+                    $("#error_sms_archive").html("Updated Successfully.");
+                    $("#error_sms_archive").css({"color": "green", "text-align": "center"});
+                    location.reload();
+                  }
+
+                }
+  });
+});
+
+
+ 
 $(".update").on("click",function()
 {
     var recid = $(this).attr('recid');
@@ -269,6 +331,8 @@ $(".update").on("click",function()
           }
     });
 });
+
+
 
 
 jQuery.validator.addMethod("lettersonly", function(value, element) 
@@ -296,16 +360,24 @@ $("#updateadmin").validate({
             equalTo : "#update_password"
           }
         },
-  submitHandler: function (form) {
+        submitHandler: function (form) {
              $.ajax({
                 type: "POST",
                 url: "admin_control.php",
                 data: $('#updateadmin').serialize() + "&action=updateadmin",
                 success: function (data) 
                 {
-                  //alert(data);
-                  $("#error_sms_update").html(data);
-                  //location.reload();
+                  if(data == 1)
+                  {
+                    $("#error_sms_update").html("Updated Successfully.");
+                    $("#error_sms_update").css({"color": "green", "text-align": "center"});
+                    setInterval(function() { location.reload(); }, 3000);
+                  }
+                  else
+                  {
+                    $("#error_sms_update").html(data);
+                    $("#error_sms_update").css({"color": "red", "text-align": "center"});
+                  }
                 }
               });
               return false; // required to block normal submit since you used ajax
@@ -331,7 +403,7 @@ $("#createadmin").validate({
             equalTo : "#password"
           }
         },
-  submitHandler: function (form) {
+        submitHandler: function (form) {
              $.ajax({
               type: "POST",
               url: "admin_control.php",
@@ -339,15 +411,26 @@ $("#createadmin").validate({
               success: function (data) 
               {
                 //alert(data);
-                $("#error_sms_update").html(data);
-                //location.reload();
+                if(data == 1)
+                {
+                  $("#error_sms_created").html("Created Successfully.");
+                  $("#error_sms_created").css({"color": "green", "text-align": "center"});
+                    setInterval(function() { location.reload(); }, 3000);
+                }
+                else
+                {
+                    $("#error_sms_created").html(data);
+                    $("#error_sms_created").css({"color": "red", "text-align": "center"});
+                }
               }
             });
              return false; // required to block normal submit since you used ajax
          }
 });
 
+
  });
-</script>
+
+        </script>
 </body>
 </html>

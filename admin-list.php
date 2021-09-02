@@ -277,11 +277,24 @@ include('connection.php');
 
 
 
+$('#updateadminpopup').on('hidden.bs.modal', function() 
+{
+    $("#error_sms_update").html("");
+    $("#updateadmin").validate().resetForm();
+});
+
+$('#createadminpopup').on('hidden.bs.modal', function() 
+{
+    $("#error_sms_created").html("");
+    $("#createadmin")[0].reset();
+    $("#createadmin").validate().resetForm();
+});
+
 $('#archiveAlert').on('show.bs.modal', function(e) 
 {
     var recid = $(e.relatedTarget).attr('recid');
     $(e.currentTarget).find('button[id="archiveBtn"]').val(recid);
-    console.log(recid);
+    //console.log(recid);
 });
 
 
